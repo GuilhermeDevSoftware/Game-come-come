@@ -6,6 +6,7 @@
 
 MAPA m;
 POSICAO heroi;
+int tempilula = 0;
 
 int praondefantasmavai(int xatual, int yatual, 
     int* xdestino, int* ydestino) {
@@ -21,8 +22,7 @@ int praondefantasmavai(int xatual, int yatual,
     for(int i = 0; i < 10; i++) {
         int posicao = rand() % 4;
 
-        if(ehvalida(&m, opcoes[posicao][0], opcoes[posicao][1]) &&
-            ehvazia(&m, opcoes[posicao][0], opcoes[posicao][1])) {
+        if(podeandar(&m, FANTASMA, opcoes[posicao][0], opcoes[posicao][1])) {
             *xdestino = opcoes[posicao][0];
             *ydestino = opcoes[posicao][1];
             return 1;
@@ -55,7 +55,9 @@ void fantasmas() {
 }
 
 int acabou(){
-    return 0;
+    POSICAO pos;
+    int fogefogenomapa = encontramapa(&m, &pos, HEROI);
+    return !fogefogenomapa;
 }
 
 int ehdirecao(char direcao){
@@ -88,17 +90,23 @@ void move(char direcao){
             break;      
     }   
 
-    if(!ehvalida(&m, proximox, proximoy))
+    if(!podeandar(&m, HEROI, proximox, proximoy))
     return;
 
-    if(!ehvazia(&m, proximox, proximoy))
-    return;
+    if(ehpersonagem(&m, PILULA, proximox, proximoy)) {
+        tempilula = 1;
+    }
 
     andanomapa(&m, heroi.x, heroi.y, proximox, proximoy);
     heroi.x = proximox;
     heroi.y = proximoy;
 }
 
+void explodepilula(int x, int y, int qtd) {
+    if(qtd == 0) return;
+    m.matriz[x][y+1] = VAZIO;
+    explodepilula(x, y+1, qtd-1);
+}
 
 int main(){
 
@@ -107,16 +115,20 @@ int main(){
     
     do
     {
-        imprimemapa(&m);
+       printf("Pílula: %s\n", (tempilula ? "SIM" : "NAO"));
+		imprimemapa(&m);
 
-        char comando;
-        scanf(" %c", &comando);
-        move(comando);
-        fantasmas();
-    } while (!acabou());
-    
+		char comando;
+		scanf(" %c", &comando);
 
-    liberamapa(&m);
+		if(ehdirecao(comando)) move(comando);
+		if(comando == 'B') explodepilula(heroi.x, heroi.y, 3);
+
+		fantasmas();
+
+	} while (!acabou());
+
+	liberamapa(&m);
 
     return 0;
 }
