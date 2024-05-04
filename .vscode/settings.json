@@ -2,6 +2,8 @@
     "files.associations": {
         "stdio.h": "c",
         "stdlib.h": "c",
-        "mapa.h": "c"
+        "mapa.h": "c",
+        "game.h": "c",
+        "time.h": "c"
     }
 }
